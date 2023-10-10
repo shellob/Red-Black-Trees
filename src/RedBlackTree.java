@@ -163,4 +163,142 @@ public class RedBlackTree {
         node1.color = node2.color;
         node2.color = temp;
     }
+
+    public void delete(int data) {
+        Node nodeToDelete = findNode(data);
+        if (nodeToDelete != null) {
+            deleteNode(nodeToDelete);
+        }
+    }
+
+    private void deleteNode(Node nodeToDelete) {
+        Node y = null;
+        Node x = null;
+
+        if (nodeToDelete.left == null || nodeToDelete.right == null) {
+            y = nodeToDelete;
+        } else {
+            y = successor(nodeToDelete);
+        }
+
+        if (y.left != null) {
+            x = y.left;
+        } else {
+            x = y.right;
+        }
+
+        if (x != null) {
+            x.parent = y.parent;
+        }
+
+        if (y.parent == null) {
+            root = x;
+        } else if (y == y.parent.left) {
+            y.parent.left = x;
+        } else {
+            y.parent.right = x;
+        }
+
+        if (y != nodeToDelete) {
+            nodeToDelete.value = y.value;
+        }
+
+        if (y.color == BLACK) {
+            fixDelete(x);
+        }
+    }
+
+    private void fixDelete(Node x) {
+        while (x != root && x.color == BLACK) {
+            if (x == x.parent.left) {
+                Node s = x.parent.right;
+                if (s.color == RED) {
+                    s.color = BLACK;
+                    x.parent.color = RED;
+                    rotateLeft(x.parent);
+                    s = x.parent.right;
+                }
+
+                if (s.left.color == BLACK && s.right.color == BLACK) {
+                    s.color = RED;
+                    x = x.parent;
+                } else {
+                    if (s.right.color == BLACK) {
+                        s.left.color = BLACK;
+                        s.color = RED;
+                        rotateRight(s);
+                        s = x.parent.right;
+                    }
+
+                    s.color = x.parent.color;
+                    x.parent.color = BLACK;
+                    s.right.color = BLACK;
+                    rotateLeft(x.parent);
+                    x = root;
+                }
+            } else {
+                Node s = x.parent.left;
+                if (s.color == RED) {
+                    s.color = BLACK;
+                    x.parent.color = RED;
+                    rotateRight(x.parent);
+                    s = x.parent.left;
+                }
+
+                if (s.right.color == BLACK && s.right.color == BLACK) {
+                    s.color = RED;
+                    x = x.parent;
+                } else {
+                    if (s.left.color == BLACK) {
+                        s.right.color = BLACK;
+                        s.color = RED;
+                        rotateLeft(s);
+                        s = x.parent.left;
+                    }
+
+                    s.color = x.parent.color;
+                    x.parent.color = BLACK;
+                    s.left.color = BLACK;
+                    rotateRight(x.parent);
+                    x = root;
+                }
+            }
+        }
+        x.color = BLACK;
+    }
+
+    private Node successor(Node x) {
+        if (x.right != null) {
+            return minimum(x.right);
+        }
+
+        Node y = x.parent;
+        while (y != null && x == y.right) {
+            x = y;
+            y = y.parent;
+        }
+        return y;
+    }
+
+    private Node minimum(Node x) {
+        while (x.left != null) {
+            x = x.left;
+        }
+        return x;
+    }
+
+    private Node findNode(int data) {
+        Node current = root;
+        while (current != null) {
+            if (data < current.value) {
+                current = current.left;
+            } else if (data > current.value) {
+                current = current.right;
+            } else {
+                return current; // Узел найден
+            }
+        }
+        return null; // Узел не найден
+    }
+
 }
